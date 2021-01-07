@@ -11,8 +11,9 @@ from helper import get_values_r231, get_values_ltrclobes
 args = {
     "model_type": "unet",
     "model_name": "LTRCLobes",
-    "postprocess": True
+    "postprocess": True,
 }
+
 
 class MDAIModel:
     def __init__(self):
@@ -20,7 +21,7 @@ class MDAIModel:
         self.model_name = args.get("model_name").lower()
         self.postprocessing = args.get("postprocess", True)
 
-        root_path = os.path.join(os.path.dirname(__file__))
+        root_path = os.path.dirname(os.path.dirname(__file__))
 
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
@@ -51,14 +52,21 @@ class MDAIModel:
 
             if len(image.shape) == 2:
                 image = np.expand_dims(image, 0)
-            
-            outmask = apply(image, self.model, self.device, volume_postprocessing = self.postprocessing)
+
+            outmask = apply(
+                image,
+                self.model,
+                self.device,
+                volume_postprocessing=self.postprocessing,
+            )
             outmask = outmask.squeeze(0)
 
             if self.model_name == "ltrclobes":
                 vals = set(np.unique(outmask))
-                masks = [(np.uint8(outmask)==i,i-1) for i in range(1,6) if i in vals]
-                outputs += get_values_ltrclobes(masks, ds)                
+                masks = [
+                    (np.uint8(outmask) == i, i - 1) for i in range(1, 6) if i in vals
+                ]
+                outputs += get_values_ltrclobes(masks, ds)
             else:
                 outputs += get_values_r231(outmask, ds)
         return outputs
