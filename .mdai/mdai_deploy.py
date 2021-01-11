@@ -10,7 +10,7 @@ from helper import get_values_r231, get_values_ltrclobes
 # Currently supported model names - R231, LTRCLobes, R231CovidWeb
 args = {
     "model_type": "unet",
-    "model_name": "LTRCLobes",
+    "model_name": "R231",
     "postprocess": True,
 }
 
@@ -22,13 +22,7 @@ class MDAIModel:
         self.postprocessing = args.get("postprocess", True)
 
         root_path = os.path.dirname(os.path.dirname(__file__))
-
-        if torch.cuda.is_available():
-            self.device = torch.device("cuda")
-            gpu_ids = list(range(torch.cuda.device_count()))
-        else:
-            self.device = torch.device("cpu")
-            gpu_ids = []
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.model = get_model(self.model_type, self.model_name, root_path, self.device)
         self.model.to(self.device)
@@ -47,8 +41,14 @@ class MDAIModel:
             ds = pydicom.dcmread(BytesIO(file["content"]))
             image = ds.pixel_array
 
-            if image.dtype == "int16":
-                image = image.astype("int32") - 1024
+            if image.max() > 4095 or image.min() < -2000:
+                image = np.int16(
+                    (image - image.min())
+                    * ((4095 + 1024) / (image.max() - image.min()))
+                    - 1024
+                )
+            else:
+                image = np.int16(image) - 1024
 
             if len(image.shape) == 2:
                 image = np.expand_dims(image, 0)
