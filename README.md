@@ -1,5 +1,7 @@
 # Automated lung segmentation in CT under presence of severe pathologies
 
+[![View on MD.ai](https://mdai-assets.s3.amazonaws.com/logo/github_badge.svg)](https://public.md.ai/annotator/project/LxR6dq2p)
+
 This package provides trained U-net models for lung segmentation. For now, four models are available:
 
 - U-net(R231): This model was trained on a large and diverse dataset that covers a wide range of visual variabiliy. The model performs segmentation on individual slices, extracts right-left lung seperately includes airpockets, tumors and effusions. The trachea will not be included in the lung segmentation. https://doi.org/10.1186/s41747-020-00173-2
