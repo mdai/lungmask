@@ -59,7 +59,7 @@ class MDAIModel:
                 self.device,
                 volume_postprocessing=self.postprocessing,
             )
-            outmask = outmask.squeeze(0)
+            outmask = np.uint8(outmask.squeeze(0))
 
             if self.model_name == "ltrclobes":
                 vals = set(np.unique(outmask))
